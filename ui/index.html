@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sticky To-Do</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="background-canvas" aria-hidden="true"></canvas>
+  <canvas id="effects-canvas" aria-hidden="true"></canvas>
+
+  <!-- Grabbing any part of the toolbar that isn't a button moves the window (it has no Windows
+       title bar); see wireWindowControls in app.js. -->
+  <header class="toolbar" title="Drag to move">
+    <div class="app-name"><span id="app-emoji">📝</span> Sticky To-Do</div>
+    <button id="add-note-button" class="toolbar-button" title="Add a new sticky note">＋<span class="button-label"> Note</span></button>
+    <button id="collapse-all-button" class="toolbar-button" title="Collapse or expand every note">⇕<span class="button-label"> Fold all</span></button>
+    <span class="toolbar-spacer"></span>
+    <span id="save-status" class="save-status" aria-live="polite"></span>
+    <button id="log-button" class="toolbar-button icon-button" title="Done log: what you finished each day">📅</button>
+    <button id="pin-button" class="toolbar-button icon-button" title="Keep on top of other windows">📌</button>
+    <button id="settings-button" class="toolbar-button icon-button" title="Backgrounds, effects and icon">⚙️</button>
+    <div id="window-controls" class="window-controls" hidden>
+      <button id="minimize-button" class="window-button" title="Shrink to a floating bubble">─</button>
+      <button id="maximize-button" class="window-button" title="Maximise">□</button>
+      <button id="close-button" class="window-button close" title="Close">✕</button>
+    </div>
+  </header>
+  <div id="resize-grip" class="resize-grip" title="Drag to resize" hidden></div>
+
+  <main id="board" class="board"></main>
+
+  <aside id="settings-panel" class="settings-panel" hidden>
+    <div class="settings-header">
+      <h2>Make it yours</h2>
+      <button id="close-settings-button" class="toolbar-button icon-button" title="Close">✕</button>
+    </div>
+
+    <section class="settings-section">
+      <h3>Background</h3>
+      <div id="background-choices" class="swatch-grid"></div>
+      <div id="custom-colors" class="custom-colors" hidden>
+        <label>Colour 1 <input type="color" data-index="0"></label>
+        <label>Colour 2 <input type="color" data-index="1"></label>
+        <label>Colour 3 <input type="color" data-index="2"></label>
+      </div>
+      <label class="slider-row">Speed <input id="speed-slider" type="range" min="0.1" max="3" step="0.1"></label>
+      <label class="check-row"><input id="still-checkbox" type="checkbox"> Hold still (no movement until touched)</label>
+    </section>
+
+    <section class="settings-section">
+      <h3>Touch effect</h3>
+      <div id="effect-choices" class="chip-grid"></div>
+      <label class="check-row"><input id="ambient-checkbox" type="checkbox"> Ambient (happens on its own now and then)</label>
+      <label class="check-row"><input id="sound-checkbox" type="checkbox"> Sound</label>
+    </section>
+
+    <section class="settings-section">
+      <h3>App icon</h3>
+      <div class="icon-preview-row">
+        <div id="icon-preview" class="icon-preview">📝</div>
+        <span class="settings-note">Shows on the taskbar and your desktop shortcut.</span>
+      </div>
+      <div id="emoji-choices" class="emoji-grid"></div>
+      <div class="emoji-custom-row">
+        <input id="emoji-input" type="text" maxlength="16" placeholder="Or paste any emoji (Win + .)">
+        <button id="emoji-apply-button" class="toolbar-button">Use it</button>
+      </div>
+      <h3 class="subheading">Icon colour</h3>
+      <div id="icon-colour-choices" class="colour-row">
+        <label class="colour-choice custom-colour" title="Pick any colour"><input id="icon-colour-input" type="color" value="#7a4dd8">🎨</label>
+      </div>
+      <p id="emoji-message" class="settings-note" aria-live="polite"></p>
+    </section>
+
+    <p id="storage-note" class="settings-note"></p>
+  </aside>
+
+  <aside id="log-panel" class="settings-panel log-panel" hidden>
+    <div class="settings-header">
+      <h2>Done log</h2>
+      <button id="close-log-button" class="toolbar-button icon-button" title="Close">✕</button>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar-header">
+        <button id="previous-month-button" class="toolbar-button icon-button" title="Previous month">◀</button>
+        <span id="calendar-month" class="calendar-month"></span>
+        <button id="next-month-button" class="toolbar-button icon-button" title="Next month">▶</button>
+      </div>
+      <div id="calendar-grid" class="calendar-grid"></div>
+    </div>
+
+    <section class="settings-section">
+      <div class="log-day-header">
+        <h3 id="log-day-title"></h3>
+        <button id="log-today-button" class="toolbar-button" title="Jump to today">Today</button>
+      </div>
+      <ul id="log-entries" class="log-entries"></ul>
+      <input id="log-add-input" class="log-add-input" type="text" maxlength="2000"
+             placeholder="＋ Add something you did, press Enter">
+      <p class="settings-note">Tasks you tick are added here automatically.</p>
+    </section>
+  </aside>
+
+  <div id="flash-overlay" class="flash-overlay" aria-hidden="true"></div>
+
+  <script src="shaders.js"></script>
+  <script src="backgrounds.js"></script>
+  <script src="effects.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
