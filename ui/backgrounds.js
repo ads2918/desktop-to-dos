@@ -12,6 +12,12 @@ window.Backgrounds = (() => {
     { id: "lava", label: "Lava Lamp", mode: 5, css: "radial-gradient(circle at 40% 60%, #ffb21a, #ff5a0d 25%, #4d0840 60%)" },
     { id: "cosmic", label: "Cosmic", mode: 6, css: "radial-gradient(circle at 30% 40%, #6b1a8a, #0a0018 70%)" },
     { id: "vortex", label: "Vortex", mode: 7, css: "repeating-conic-gradient(#ff3cac 0 15deg, #2b86c5 15deg 30deg)" },
+    { id: "kaleidoscope", label: "Kaleidoscope", mode: 9, css: "conic-gradient(#ff3cac, #ffd23f, #3bf4fb, #ff3cac, #8a4fff, #3bf4fb, #ff3cac)" },
+    { id: "synthwave", label: "Synthwave", mode: 10, css: "linear-gradient(0deg, #14002b 0 42%, #ff3d8b 42%, #ffb03d 62%, #2a0a4a)" },
+    { id: "rain", label: "Digital Rain", mode: 11, css: "repeating-linear-gradient(90deg, #00170a 0 6px, #11d65a 6px 8px)" },
+    { id: "hypno", label: "Hypno Rings", mode: 12, css: "repeating-radial-gradient(circle, #ff3cac 0 6px, #1a1030 6px 12px, #3bf4fb 12px 18px)" },
+    { id: "marble", label: "Liquid Marble", mode: 13, css: "linear-gradient(135deg, #d9a7c7, #7f7fd5, #fffcdc, #86a8e7)" },
+    { id: "warp", label: "Warp Speed", mode: 14, css: "radial-gradient(circle, #6a4fd8 0, #0a0624 45%, #000 70%)" },
     { id: "custom", label: "Your colours", mode: 8, css: "" },
   ];
 

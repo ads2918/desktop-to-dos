@@ -184,6 +184,99 @@ vec3 vortexTunnel(vec2 p, float t) {
   return color * smoothstep(0.0, 0.35, radius) + vec3(1.0) * exp(-radius * 18.0) * 0.6;
 }
 
+// Folds the angle into one mirrored wedge and repeats it 8 times around the centre.
+vec3 kaleidoscope(vec2 p, float t) {
+  float radius = length(p);
+  float wedge = TAU / 8.0;
+  float angle = mod(atan(p.y, p.x) + t * 0.1, wedge);
+  angle = abs(angle - wedge * 0.5);
+  vec2 q = vec2(cos(angle), sin(angle)) * radius + vec2(t * 0.05, 0.0);
+  float n = fbm(q * 4.0 + t * 0.1);
+  float rings = sin(radius * 14.0 - t * 1.2 + n * 6.0);
+  vec3 color = rainbow(n * 1.5 + radius * 0.8 - t * 0.05) * (0.75 + 0.25 * rings);
+  return color + vec3(1.0) * smoothstep(0.92, 1.0, rings) * 0.25;
+}
+
+// Striped sun and starry sky above the horizon, a neon grid rolling towards you below it.
+vec3 synthwave(vec2 uv, vec2 p, float t) {
+  float horizon = 0.42;
+  if (uv.y > horizon) {
+    float height = (uv.y - horizon) / (1.0 - horizon);
+    vec3 sky = mix(vec3(1.0, 0.35, 0.55), vec3(0.12, 0.02, 0.3), pow(height, 0.6));
+    vec2 sunCentre = vec2(0.0, 0.18);
+    float distanceToSun = length(p - sunCentre);
+    float sun = smoothstep(0.22, 0.215, distanceToSun);
+    float gaps = step(0.5, fract((p.y - sunCentre.y) * 18.0 - t * 0.3));
+    sun *= 1.0 - step(p.y, sunCentre.y) * (1.0 - gaps);
+    vec3 sunColor = mix(vec3(1.0, 0.85, 0.2), vec3(1.0, 0.2, 0.6), clamp((sunCentre.y + 0.22 - p.y) / 0.44, 0.0, 1.0));
+    sky = mix(sky, sunColor, sun) + vec3(1.0, 0.4, 0.7) * exp(-distanceToSun * 6.0) * 0.35;
+    return sky + step(0.997, hash(floor(uv * u_resolution / 2.0))) * height;
+  }
+  float depth = max(horizon - uv.y, 0.001);
+  vec2 grid = vec2(p.x / depth * 1.2, 0.12 / depth + t * 0.8);
+  vec2 cell = abs(fract(grid) - 0.5);
+  // Lines fade out near the horizon, where they'd be thinner than a pixel and shimmer.
+  float line = smoothstep(0.4, 0.5, max(cell.x, cell.y)) * smoothstep(0.0, 0.06, depth);
+  return vec3(0.08, 0.0, 0.15) + vec3(1.0, 0.25, 0.85) * line * (1.0 + depth * 1.5)
+       + vec3(1.0, 0.3, 0.6) * exp(-depth * 18.0) * 0.6;
+}
+
+// Columns of flickering block glyphs, each column falling at its own speed with a fading trail.
+vec3 digitalRain(vec2 uv, float t) {
+  vec2 cellCount = max(floor(u_resolution / vec2(9.0, 12.0)), vec2(8.0, 6.0));
+  vec2 cell = floor(uv * cellCount);
+  float speed = 0.6 + hash(vec2(cell.x, 1.0)) * 1.4;
+  float headRow = mod(t * speed * 12.0 + hash(vec2(cell.x, 7.0)) * 500.0, cellCount.y + 30.0);
+  float behindHead = headRow - (cellCount.y - cell.y);
+  float trail = behindHead >= 0.0 ? exp(-behindHead * 0.12) : 0.0;
+  float glyphSeed = hash(cell + floor(t * (2.0 + hash(cell) * 6.0)));
+  vec2 inCell = fract(uv * cellCount);
+  float glyph = step(0.5, hash(floor(inCell * vec2(3.0, 4.0)) + glyphSeed * 13.0));
+  glyph *= step(0.12, inCell.x) * step(inCell.x, 0.88) * step(0.08, inCell.y) * step(inCell.y, 0.92);
+  float head = step(0.0, behindHead) * step(behindHead, 0.99);
+  return vec3(0.0, 0.03, 0.01) + vec3(0.1, 1.0, 0.35) * glyph * trail + vec3(0.8, 1.0, 0.85) * glyph * head;
+}
+
+// Concentric rings that pulse outward and twist, in shifting rainbow colours.
+vec3 hypnoRings(vec2 p, float t) {
+  float radius = length(p);
+  float angle = atan(p.y, p.x);
+  float wave = sin(radius * 30.0 - t * 3.0 + sin(angle * 3.0 + t) * 1.5);
+  float twist = sin(angle * 6.0 + radius * 10.0 - t * 2.0);
+  vec3 color = rainbow(radius * 1.2 - t * 0.15 + 0.1 * twist);
+  return mix(color * 0.15, color, smoothstep(-0.2, 0.2, wave * twist));
+}
+
+// Noise fed into noise fed into noise ("domain warping") gives the swirls of marbled ink.
+vec3 liquidMarble(vec2 p, float t) {
+  vec2 q = vec2(fbm(p * 1.5 + t * 0.03), fbm(p * 1.5 + vec2(5.2, 1.3) - t * 0.03));
+  vec2 r = vec2(fbm(p * 1.5 + 4.0 * q + vec2(1.7, 9.2) + t * 0.05),
+                fbm(p * 1.5 + 4.0 * q + vec2(8.3, 2.8) - t * 0.04));
+  float f = fbm(p * 1.5 + 4.0 * r);
+  vec3 color = cosinePalette(f * 1.6 + r.x, vec3(0.6, 0.5, 0.6), vec3(0.4, 0.4, 0.45), vec3(1.0), vec3(0.0, 0.2, 0.45));
+  return mix(color, vec3(1.0), smoothstep(0.75, 0.95, f) * 0.5);
+}
+
+// Stars on thin spokes from the centre, speeding up and stretching as they fly outward.
+vec3 warpSpeed(vec2 p, float t) {
+  float radius = length(p);
+  float angle = atan(p.y, p.x);
+  vec3 color = vec3(0.0, 0.0, 0.03) + vec3(0.3, 0.2, 0.6) * exp(-radius * 4.0) * 0.5;
+  for (int layer = 0; layer < 3; layer++) {
+    float fl = float(layer);
+    float spokes = 140.0 + fl * 60.0;
+    float spoke = floor(angle / TAU * spokes);
+    float rnd = hash(vec2(spoke, fl));
+    float travelled = fract(rnd * 7.3 + t * (0.4 + rnd * 1.2) * 0.25);
+    float starRadius = travelled * travelled * 1.4;
+    float streak = smoothstep(0.02 + travelled * 0.25, 0.0, starRadius - radius) * step(radius, starRadius);
+    float acrossSpoke = 1.0 - abs(fract(angle / TAU * spokes) - 0.5) * 2.0;
+    streak *= smoothstep(0.6, 1.0, acrossSpoke) * step(0.6, rnd);
+    color += mix(vec3(0.6, 0.8, 1.0), vec3(1.0, 0.7, 1.0), rnd) * streak * travelled * 1.5;
+  }
+  return color;
+}
+
 vec3 customGradient(vec2 uv, float t) {
   float f = uv.y + 0.3 * (fbm(uv * 2.0 + t * 0.08) - 0.5) + 0.1 * sin(uv.x * 3.0 + t * 0.3);
   vec3 color = mix(u_color1, u_color2, smoothstep(0.0, 0.5, f));
@@ -207,6 +300,12 @@ void main() {
   else if (u_mode == 5) color = lavaLamp(p, t);
   else if (u_mode == 6) color = cosmic(uv, p, t);
   else if (u_mode == 7) color = vortexTunnel(p, t);
+  else if (u_mode == 9) color = kaleidoscope(p, t);
+  else if (u_mode == 10) color = synthwave(uv, p, t);
+  else if (u_mode == 11) color = digitalRain(uv, t);
+  else if (u_mode == 12) color = hypnoRings(p, t);
+  else if (u_mode == 13) color = liquidMarble(p, t);
+  else if (u_mode == 14) color = warpSpeed(p, t);
   else color = customGradient(uv, t);
 
   color += vec3(0.85, 0.95, 1.0) * clamp(shine, -0.6, 1.0) * 0.35;

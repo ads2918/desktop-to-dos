@@ -39,7 +39,8 @@ Run `python install_startup.py --remove` to undo that.
 | Keep on top | 📌 (faded = not on top) |
 | Backgrounds, effects, icon | ⚙️ |
 
-**Backgrounds:** Tie-dye, Sunset, Ocean, Aurora, Neon Acid, Lava Lamp, Cosmic, Vortex, or your own
+**Backgrounds:** Tie-dye, Sunset, Ocean, Aurora, Neon Acid, Lava Lamp, Cosmic, Vortex, Kaleidoscope,
+Synthwave, Digital Rain, Hypno Rings, Liquid Marble, Warp Speed, or your own
 three colours. There's a speed slider, and "Hold still" freezes the background until you touch it.
 
 **Touch effects:** Water, Raindrops, Thunderstorm, Vortex, Melt, Fireworks, Bubbles, Snow, or Off.
